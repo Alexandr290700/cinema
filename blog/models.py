@@ -3,6 +3,7 @@ from django.db import models
 # Create your models here.
 
 class Movie(models.Model):
+    """Фильм"""
     name = models.CharField(max_length=255, verbose_name='Название фильма')
     duration = models.CharField(max_length=50, verbose_name='Длительность')
     rental_start_date = models.DateField(verbose_name='Дата начала проката')
@@ -33,10 +34,10 @@ class Saloon(models.Model):
         return str(self.name)
 
 class Seans(models.Model):
-    saloon = models.ForeignKey(Saloon, on_delete=models.CASCADE, verbose_name='Зал')
+    saloon = models.ForeignKey(Saloon, on_delete=models.CASCADE, verbose_name='Зал', related_name='saloon_session')
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, verbose_name='Фильм')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, verbose_name='Фильм', related_name='movie_session')
 
     class Meta:
         verbose_name = 'Сеанс'
