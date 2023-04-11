@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -85,6 +86,7 @@ class SectorSaloon(models.Model):
         return self.name
 
 class Employees(models.Model):
+    # user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
     name = models.CharField(max_length=100, verbose_name='Имя')
     title = models.ForeignKey(JobTitle, on_delete=models.CASCADE,max_length=40, verbose_name='Должность')
     password = models.CharField(max_length=100, verbose_name='Пароль')
@@ -130,7 +132,8 @@ class MovingTickets(models.Model):
     ticket = models.ForeignKey(Tickets, on_delete=models.CASCADE, verbose_name='Номер билета')
     date_create = models.DateField(verbose_name='Дата')
     operation = models.CharField(max_length=50, verbose_name='Операция')
-    employee = models.ForeignKey(Employees, on_delete=models.CASCADE, verbose_name='Сотрудник')
+    # employee = models.ForeignKey(Employees, on_delete=models.CASCADE, verbose_name='Сотрудник')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Продавец', related_name='seller')
 
     class Meta:
         verbose_name = 'Движение билета'

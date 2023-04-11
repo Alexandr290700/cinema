@@ -1,10 +1,9 @@
 import django_filters
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
-from rest_framework import filters
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework import generics
+from rest_framework import filters, generics, status
+
 from django.contrib.auth.models import User
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from .models import *
 from .serializers import *
@@ -56,6 +55,7 @@ class MovieListAPIView(ListAPIView):
     # filterset_fields = ('sales_company', )
     search_fields = ('name', 'sales_company')
     # filterset_class = MovieFilter
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
     def get_queryset(self):
         queryset = Movie.objects.all()
@@ -63,10 +63,13 @@ class MovieListAPIView(ListAPIView):
     
 class MovieCreateAPIViews(CreateAPIView):
     serializer_class = MovieSerializers
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
     
+
     def get_queryset(self):
         queryset = Movie.objects.all()
         return queryset
+    
 
 
 class MovieRetrieveAPIView(RetrieveAPIView):
@@ -95,6 +98,7 @@ class SaloonRetrieveAPIViews(RetrieveAPIView):
 class SaloonCreateAPIViews(CreateAPIView):
     serializer_class = SaloonSerializers
     queryset = Saloon.objects.all()
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
 
 class SeansRetrieveAPIView(RetrieveAPIView):
@@ -114,8 +118,8 @@ class SeansListAPIViews(ListAPIView, CreateAPIView):
     search_fields = ('saloon', 'movie', )
     filterset_class = SeansFilter
 
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # authentication_classes = [SessionAuthentication, BasicAuthentication]
+    # permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         queryset = Seans.objects.all()
@@ -125,6 +129,8 @@ class SeansListAPIViews(ListAPIView, CreateAPIView):
 class SeansCreateAPIViews(CreateAPIView):
     serializer_class = SeansSerializers
     queryset = Seans.objects.all()
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
 
 
 class TitleFilter(django_filters.FilterSet):
@@ -172,6 +178,8 @@ class PlacesRetrieveAPIViews(RetrieveAPIView):
 class PlacesCreateAPIViews(CreateAPIView):
     serializer_class = PlacesSerializers
     queryset = Places.objects.all()
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
 
 
 class SectorSaloonFilter(django_filters.FilterSet):
@@ -190,6 +198,8 @@ class SectorSaloonListAPIViews(ListAPIView):
 class SectorSaloonCreateAPIViews(CreateAPIView):
     serializer_class = SectorSaloonSerializers
     queryset = SectorSaloon.objects.all()
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
 
 class SectorSaloonRetrieveAPIViews(RetrieveAPIView):
     serializer_class = SectorSaloonDetailSerializers
@@ -243,4 +253,28 @@ class PriceForTicketsCreateAPIViews(CreateAPIView):
 class PriceForTicketsRetrieveAPIViews(RetrieveAPIView):
     serializer_class = PriceForTicketsDetailSerializers
     queryset = PriceForTickets.objects.all()
+
+class MovingTicketsListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = MovingTicketsSerializers
+    queryset = MovingTickets.objects.all()
+    permission_classes = [  DjangoModelPermissionsOrAnonReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user)
+
+class MovingTicketsRetrieveAPIVew(generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
+    serializer_class = MovingTicketsSerializers
+    queryset = MovingTickets.objects.all()
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+    def update(self, request, *args, **kwargs):
+        # береме запись
+        isinstance = self.get_object()
+        # Проверяем, что пользователь является создателем записи
+        if isinstance.seller == request.user:
+            return super().update(request, *args, **kwargs)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'message': 'You are not the owner of this record'})
+        
+
 

@@ -57,9 +57,9 @@ class TicketsAdmin(admin.ModelAdmin):
     list_filter = ('ticket_number', 'date_created', 'seanses')
 
 class MovingTicketsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'moving_tickets', 'ticket', 'date_create', 'operation', 'employee')
-    list_display_links = ('id', 'moving_tickets','ticket', 'employee')
-    search_fields = ('ticket', 'employee')
+    list_display = ('id', 'moving_tickets', 'ticket', 'date_create', 'operation', )
+    list_display_links = ('id', 'moving_tickets','ticket', )
+    search_fields = ('ticket', )
     list_filter = ('id', 'ticket')
     
 

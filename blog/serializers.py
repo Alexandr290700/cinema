@@ -231,4 +231,11 @@ class PriceForTicketsDetailSerializers(serializers.ModelSerializer):
         model = PriceForTickets
         fields = ('seanse', 'sector', 'price', 'price_for_tickets')
 
-    
+
+class MovingTicketsSerializers(serializers.ModelSerializer):
+    ticket = serializers.CharField(source='ticket.number')
+    # employee = serializers.CharField(source='employee.name')
+    class Meta:
+        model = MovingTickets
+        fields = ('id', 'moving_tickets', 'ticket', 'date_create', 'operation', )
+        read_only_fields = ('id', 'date_create', )
