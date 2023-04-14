@@ -33,5 +33,8 @@ urlpatterns = [
     path('price_for_tickets/<int:pk>/', PriceForTicketsRetrieveAPIViews.as_view(), name='price_for_tickets_retrieve'),
     path('moving_tickets/', MovingTicketsListCreateAPIView.as_view(), name='moving_tickets'),
     path('moving_tickets/<int:pk>/', MovingTicketsRetrieveAPIVew.as_view(), name='moving_tickets_retrieve'),
+    path('movie_template', MovieTemplateView.as_view(), name='movie_template'),
+    path('movie_detail/<int:pk>/', MovieDetailView.as_view(), name='movie_detail'),
+    path('movie_create/', MovieCreateView.as_view(), name='movie_create'),
     
 ]
