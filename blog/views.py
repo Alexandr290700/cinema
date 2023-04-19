@@ -19,6 +19,25 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
+
+from .tasks import create_random_user_accounts
+from django.views.generic.edit import FormView
+from django.shortcuts import redirect
+from django.contrib import messages
+
+
+
+class GenerateRandomUserView(FormView):
+    template_name = 'blog/generate_random_users.html'
+    form_class = GenerateRandomUserForm
+
+    def form_valid(self, form):
+        total = form.cleaned_data.get('total')
+        create_random_user_accounts(total)
+        messages.success(self.request, 'We are generating your random users! Wait a moment and refresh this page.')
+        return redirect('users_list')
+
+
 class AuthTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -309,6 +328,7 @@ class MovingTicketsListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
 
+
 class MovingTicketsRetrieveAPIVew(generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
     serializer_class = MovingTicketsSerializers
     queryset = MovingTickets.objects.all()
@@ -323,5 +343,3 @@ class MovingTicketsRetrieveAPIVew(generics.RetrieveAPIView, generics.DestroyAPIV
         else:
             return Response(status=status.HTTP_403_FORBIDDEN, data={'message': 'You are not the owner of this record'})
         
-
-

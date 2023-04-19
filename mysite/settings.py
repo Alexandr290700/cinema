@@ -31,7 +31,13 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+LOGIN_GMAIL = env('LOGIN_GMAIL')
+PASSWORD_GMAIL = env('PASSWORD_GMAIL')
+
 ALLOWED_HOSTS = []
+
+GOOGLE_KEY = BASE_DIR / 'blog/googlemail.json'
+GOOGLE_TOKEN = BASE_DIR / 'blog/token.json'
 
 # AUTH_USER_MODEL = 'blog.User'
 
@@ -158,3 +164,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
     ]
 }
+
+CELERY_BROKER_URL = 'amqp://localhost'
