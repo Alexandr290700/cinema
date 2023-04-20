@@ -42,4 +42,4 @@ def send_mail(to: str, subject: str, body: str):
     except HTTPError as error:
         return F'An error occurred: {error}'
     
-send_mail('bekjan02003@gmail.com', 'test', 'test')
+send_mail('kalmanbetovnurislam19@gmail.com', 'test', 'test')

@@ -7,6 +7,9 @@ from django.utils import timezone
 from celery import shared_task
 from .send_email import send_mail
 
+
+from celery import app
+
 @shared_task
 def create_random_user_accounts(total):
     for i in range(total):
@@ -18,9 +21,16 @@ def create_random_user_accounts(total):
 
 
 @shared_task
-def send_mail_task():
-    mails = ['alexandrkim.297@gmail.com']
-    for mail in mails:
-        send_mail(mail, 'test', f'test {timezone.now()}')
+def send_to_users(email, title, body):
+    return send_mail(email, title, body)
 
-        return 'Mail sent with success'
+
+@shared_task
+def send_mail_task():
+    users = User.objects.filter(is_staff=True)
+    # mails = ['alexandrkim.297@gmail.com']
+    for user in users:
+        send_to_users.delay(user.email, 'Отчет за неделю', f'{user.first_name} Ты забыл отправить отчет {timezone.now()}')
+
+    return 'Отчет просрочки для админов!'
+
