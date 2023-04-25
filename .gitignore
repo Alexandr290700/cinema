@@ -12,3 +12,4 @@ google_key
 google_key.json
 googlemail.json
 token.json
+celerybeat-schedule

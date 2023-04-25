@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'drf_yasg2',
     'rest_framework.authtoken',
     
-     
+     'django_celery_beat',
 
 
     'blog.apps.BlogConfig',

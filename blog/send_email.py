@@ -8,6 +8,7 @@ from google.oauth2.credentials import Credentials
 from requests import HTTPError
 from django.conf import settings
 
+
 SCOPES = [
         "https://www.googleapis.com/auth/gmail.send"
     ]
@@ -28,6 +29,7 @@ if not creds or not creds.valid:
     # Save the credentials for the next run
     with open(settings.GOOGLE_TOKEN, 'w') as token:
         token.write(creds.to_json())
+
 
 def send_mail(to: str, subject: str, body: str):
     service = build('gmail', 'v1', credentials=creds)
