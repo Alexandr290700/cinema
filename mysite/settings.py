@@ -34,7 +34,7 @@ DEBUG = env('DEBUG')
 LOGIN_GMAIL = env('LOGIN_GMAIL')
 PASSWORD_GMAIL = env('PASSWORD_GMAIL')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 GOOGLE_KEY = BASE_DIR / 'blog/googlemail.json'
 GOOGLE_TOKEN = BASE_DIR / 'blog/token.json'
@@ -51,6 +51,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+
+    "corsheaders",
+
     'rest_framework',
     'drf_yasg2',
     'rest_framework.authtoken',
@@ -64,6 +68,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -166,3 +171,5 @@ REST_FRAMEWORK = {
 }
 
 CELERY_BROKER_URL = 'amqp://localhost'
+
+CORS_ALLOW_ALL_ORIGINS = True

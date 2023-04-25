@@ -26,11 +26,17 @@ def send_to_users(email, title, body):
 
 
 @shared_task
+def send_to_user(user_id):
+    user = User.objects.get(id=user_id)
+
+
+@shared_task
 def send_mail_task():
     users = User.objects.filter(is_staff=True)
     # mails = ['alexandrkim.297@gmail.com']
     for user in users:
+        print(user.email)
         send_to_users.delay(user.email, 'Отчет за неделю', f'{user.first_name} Ты забыл отправить отчет {timezone.now()}')
-
+    
     return 'Отчет просрочки для админов!'
 

@@ -13,10 +13,11 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'add-every-5-seconds': {
         'task': 'blog.tasks.send_mail_task',
-        'schedule': crontab(0, 0, day_of_month='21'),
+        'schedule': crontab(),
         'args': ()
     },
 }
+
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):

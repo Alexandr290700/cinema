@@ -39,9 +39,7 @@ def send_mail(to: str, subject: str, body: str):
     create_message = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
     try:
-        message = (service.users().messages().send(userId="me", body=create_message).execute())
+        message = (service.users().messages().send(userId="me", body=create_message)).execute()
         return F'sent message to {message} Message Id: {message["id"]}'
     except HTTPError as error:
         return F'An error occurred: {error}'
-    
-send_mail('kalmanbetovnurislam19@gmail.com', 'test', 'test')
