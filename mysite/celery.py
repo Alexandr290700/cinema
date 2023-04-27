@@ -12,9 +12,9 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     'add-every-5-seconds': {
-        'task': 'blog.tasks.send_mail_task',
+        'task': 'blog.tasks.create_random_user_accounts',
         'schedule': crontab(),
-        'args': ()
+        'args': (1, )
     },
 }
 

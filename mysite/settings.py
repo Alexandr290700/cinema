@@ -34,7 +34,7 @@ DEBUG = env('DEBUG')
 LOGIN_GMAIL = env('LOGIN_GMAIL')
 PASSWORD_GMAIL = env('PASSWORD_GMAIL')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 GOOGLE_KEY = BASE_DIR / 'blog/googlemail.json'
 GOOGLE_TOKEN = BASE_DIR / 'blog/token.json'
@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'drf_yasg2',
     'rest_framework.authtoken',
     
-     'django_celery_beat',
+    'django_celery_beat',
 
 
     'blog.apps.BlogConfig',
@@ -103,11 +103,11 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DB'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+        'NAME': env('POSTGRES_DB'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
+        'HOST': env('POSTGRES_HOST'),
+        'PORT': env('POSTGRES_PORT'),
     }
 }
 
@@ -173,3 +173,8 @@ REST_FRAMEWORK = {
 CELERY_BROKER_URL = 'amqp://localhost'
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
+
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True

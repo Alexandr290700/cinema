@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14.0-alpine
+    restart: always
+    env_file:
+       - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - "5432"
+  web:
+    build: .
+    command: >
+      bash -c "python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - project:/usr/src/app
+    ports:
+      - "8000:8000"
+    environment:
+      - FLOWER_PORT=5566
+    depends_on:
+      - db
+      - rabbitmq
+      - flower
+  worker:
+    build: .
+    command: >
+      bash -c "celery -A mysite worker -l info"
+    volumes:
+      - project:/usr/src/app
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+  beat:
+    build: .
+    command: >
+      bash -c "celery -A mysite beat"
+    volumes:
+      - project:/usr/src/app
+    depends_on:
+    - db
+    - rabbitmq
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+  rabbitmq:
+    image: rabbitmq:3.9.5-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+  flower:
+    build: .
+    command: >
+      bash -c "celery flower -A mysite --port=5566"
+    ports:
+      - "5566:5566"
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+    - db
+    - rabbitmq
+volumes:
+  postgres_data:
+  project:
