@@ -10,6 +10,7 @@ from .serializers import *
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from django.views.generic.detail import DetailView
+from rest_framework import viewsets
 from django.urls import reverse
 from .forms import *
 
@@ -83,72 +84,29 @@ class MovieTemplateView(ListView):
         return context
 
 
-class MovieDetailView(DetailView):
-    template_name = "blog/detail.html"
-    model = Movie
+class MovieFilter(django_filters.FilterSet):
+    start_date = django_filters.NumberFilter(field_name="rental_start_date__year")
+    class Meta:
+        model = Movie
+        fields = ("start_date", )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["movie"] = self.model.objects.get(pk=self.kwargs["pk"])
-        return context
-
-
-class MovieCreateView(CreateView):
-    template_name = "blog/create.html"
-    form_class = MovieForm
-    success_url = "/movie_detail/"
-
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
-
-    # redirect to movie_detail
-    def get_success_url(self):
-        return reverse("movie_detail", kwargs={"pk": self.object.pk})
-
-    # def post(self, request, *args, **kwargs):
-    #     form = MovieForm(request.POST)
-    #     if form.is_valid():
-    #         form.save()
-    #     return super().get(request, *args, **kwargs)
-
-
-# class MovieFilter(django_filters.FilterSet):
-#     start_date = django_filters.NumberFilter(field_name='rental_start_date__year')
-#     class Meta:
-#         model = Movie
-#         fields = ('start_date', )
-
-
-class MovieListAPIView(ListAPIView):
+class MovieViewSet(viewsets.ModelViewSet):
+    queryset = Movie.objects.all()
     serializer_class = MovieSerializers
     filter_backends = (
         filters.SearchFilter,
         filters.OrderingFilter,
         django_filters.rest_framework.DjangoFilterBackend,
     )
-    # filterset_fields = ('sales_company', )
+    filterset_class = MovieFilter
+    filterset_fields = ("sales_company", )
     search_fields = ("name", "sales_company")
-    # filterset_class = MovieFilter
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
-    def get_queryset(self):
-        queryset = Movie.objects.all()
-        return queryset
-
-
-class MovieCreateAPIViews(CreateAPIView):
-    serializer_class = MovieSerializers
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-
-    def get_queryset(self):
-        queryset = Movie.objects.all()
-        return queryset
-
-
-class MovieRetrieveAPIView(RetrieveAPIView):
-    serializer_class = MovieDetailSerializer
-    queryset = Movie.objects.all()
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return MovieDetailSerializer
+        return MovieSerializers
 
 
 class SaloonFilter(django_filters.FilterSet):
@@ -159,34 +117,22 @@ class SaloonFilter(django_filters.FilterSet):
         fields = ("name",)
 
 
-class SaloonListAPIViews(ListAPIView):
-    serializer_class = SaloonSerializers
-    filter_backends = (
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    )
-    filterset_fields = ("name",)
-
-    def get_queryset(self):
-        queryset = Saloon.objects.all()
-        return queryset
-
-
-class SaloonRetrieveAPIViews(RetrieveAPIView):
-    serializer_class = SaloonDetailSerializers
+class SaloonViewSet(viewsets.ModelViewSet):
     queryset = Saloon.objects.all()
-
-
-class SaloonCreateAPIViews(CreateAPIView):
     serializer_class = SaloonSerializers
-    queryset = Saloon.objects.all()
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
+    filterset_class = SaloonFilter
+    filterset_fields = ("name", )
+    search_fields = ("name", )
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return SaloonDetailSerializers
+        return SaloonSerializers
 
-
-class SeansRetrieveAPIView(RetrieveAPIView):
-    serializer_class = SeansDetailSerializers
-    queryset = Seans.objects.all()
 
 
 class SeansFilter(django_filters.FilterSet):
@@ -197,35 +143,20 @@ class SeansFilter(django_filters.FilterSet):
         fields = ("start_date",)
 
 
-class SeansListAPIViews(ListAPIView, CreateAPIView):
-    serializer_class = SeansSerializers
-    filter_backends = (
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    )
-    filterset_fields = (
-        "saloon",
-        "movie",
-    )
-    search_fields = (
-        "saloon",
-        "movie",
-    )
-    filterset_class = SeansFilter
-
-    # authentication_classes = [SessionAuthentication, BasicAuthentication]
-    # permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def get_queryset(self):
-        queryset = Seans.objects.all()
-        return queryset
-
-
-class SeansCreateAPIViews(CreateAPIView):
-    serializer_class = SeansSerializers
+class SeansViewSet(viewsets.ModelViewSet):
     queryset = Seans.objects.all()
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    serializer_class = SeansSerializers
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
+    filterset_class = SeansFilter
+    filterset_fields = ("start_date", )
+    search_fields = ("movie", "saloon")
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return SeansDetailSerializers
+        return SeansSerializers
 
 
 class TitleFilter(django_filters.FilterSet):
@@ -238,29 +169,21 @@ class TitleFilter(django_filters.FilterSet):
         fields = ("title",)
 
 
-class JobTitleListAPIViews(ListAPIView):
+class JobTitleViewSet(viewsets.ModelViewSet):
+    queryset = JobTitle.objects.all()
     serializer_class = JobTitleSerializers
-    filter_backends = (
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    )
-    filterset_fields = ("title",)
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
     filterset_class = TitleFilter
+    filterset_fields = ("title", )
+    search_fields = ("title", )
 
-    def get_queryset(self):
-        queryset = JobTitle.objects.all()
-        return queryset
-
-
-class JobTitleRetrieveAPIViews(RetrieveAPIView):
-    serializer_class = JobTitleDetailSerializers
-    queryset = JobTitle.objects.all()
-
-
-class JobTitleCreateAPIViews(CreateAPIView):
-    serializer_class = JobTitleSerializers
-    queryset = JobTitle.objects.all()
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return JobTitleDetailSerializers
+        return JobTitleSerializers
 
 
 class PlacesFilter(django_filters.FilterSet):
@@ -273,27 +196,21 @@ class PlacesFilter(django_filters.FilterSet):
         fields = ("saloon_name",)
 
 
-class PlacesListAPIViews(ListAPIView):
-    serializer_class = PlacesSerializers
-    filter_backends = {
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    }
-    filterset_fields = ("saloon__name",)
+class PlacesViewSet(viewsets.ModelViewSet):
     queryset = Places.objects.all()
+    serializer_class = PlaceSerializers
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
     filterset_class = PlacesFilter
-
-
-class PlacesRetrieveAPIViews(RetrieveAPIView):
-    serializer_class = PlacesDetailSerializers
-    queryset = Places.objects.all()
-
-
-class PlacesCreateAPIViews(CreateAPIView):
-    serializer_class = PlacesSerializers
-    queryset = Places.objects.all()
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filterset_fields = ("saloon_name", )
+    search_fields = ("saloon", "row_number", "row_place")
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return PlacesDetailSerializers
+        return PlaceSerializers
 
 
 class SectorSaloonFilter(django_filters.FilterSet):
@@ -306,27 +223,21 @@ class SectorSaloonFilter(django_filters.FilterSet):
         fields = ("name",)
 
 
-class SectorSaloonListAPIViews(ListAPIView):
+class SectorSaloonViewSet(viewsets.ModelViewSet):
+    queryset = SectorSaloon.objects.all()
     serializer_class = SectorSaloonSerializers
-    filter_backends = {
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    }
-    filterset_fields = ("saloon__name",)
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
     filterset_class = SectorSaloonFilter
-    queryset = SectorSaloon.objects.all()
+    filterset_fields = ("name", )
+    search_fields = ("name", "saloon")
 
-
-class SectorSaloonCreateAPIViews(CreateAPIView):
-    serializer_class = SectorSaloonSerializers
-    queryset = SectorSaloon.objects.all()
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-
-
-class SectorSaloonRetrieveAPIViews(RetrieveAPIView):
-    serializer_class = SectorSaloonDetailSerializers
-    queryset = SectorSaloon.objects.all()
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return SectorSaloonDetailSerializers
+        return SectorSaloonSerializers
 
 
 class EmployeesFilter(django_filters.FilterSet):
@@ -339,30 +250,21 @@ class EmployeesFilter(django_filters.FilterSet):
         fields = ("name",)
 
 
-class EmployeesListAPIViews(ListAPIView):
+class EmployeesViewSet(viewsets.ModelViewSet):
+    queryset = Employees.objects.all()
     serializer_class = EmployeesSerializers
-    filter_backends = (
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    )
-    filterset_fields = ("title__title",)
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
     filterset_class = EmployeesFilter
-    queryset = Employees.objects.all()
+    filterset_fields = ("name", )
+    search_fields = ("name", "title")
 
-
-class EmployeesRetrieveAPIView(RetrieveAPIView):
-    serializer_class = EmployeeDetailSerializers
-    queryset = Employees.objects.all()
-
-
-class EmployeesCreateAPIViews(CreateAPIView):
-    serializer_class = EmployeesSerializers
-
-    # queryset = Employees.objects.all()
-    def get_queryset(self):
-        queryset = Employees.objects.all()
-        return queryset
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return EmployeeDetailSerializers
+        return EmployeesSerializers
 
 
 class PriceForTicketsFilter(django_filters.FilterSet):
@@ -375,26 +277,21 @@ class PriceForTicketsFilter(django_filters.FilterSet):
         fields = ("seans",)
 
 
-class PriceForTicketsListAPIViews(ListAPIView):
-    serializer_class = PriceForTicketsSerializers
-    filter_backends = {
-        filters.SearchFilter,
-        filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
-    }
-    filterset_fields = ("sector__name",)
+class PriceForTicketsViewSet(viewsets.ModelViewSet):
+    queryset = PriceForTickets.objects.all()
+    serializer_class = PriceForTickets
+    filter_backends = (filters.SearchFilter,
+                       filters.OrderingFilter,
+                       django_filters.rest_framework.DjangoFilterBackend,
+                       )
     filterset_class = PriceForTicketsFilter
-    queryset = PriceForTickets.objects.all()
+    filterset_fields = ("seans")
+    search_fields = ("seans", "sector")
 
-
-class PriceForTicketsCreateAPIViews(CreateAPIView):
-    serializer_class = PriceForTicketsSerializers
-    queryset = PriceForTickets.objects.all()
-
-
-class PriceForTicketsRetrieveAPIViews(RetrieveAPIView):
-    serializer_class = PriceForTicketsDetailSerializers
-    queryset = PriceForTickets.objects.all()
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return PriceForTicketsDetailSerializers
+        return PriceForTicketsSerializers
 
 
 class MovingTicketsListCreateAPIView(generics.ListCreateAPIView):

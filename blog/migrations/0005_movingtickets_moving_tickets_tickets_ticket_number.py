@@ -4,22 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('blog', '0004_alter_movingtickets_options_and_more'),
+        ("blog", "0004_alter_movingtickets_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='movingtickets',
-            name='moving_tickets',
-            field=models.IntegerField(default=1, verbose_name='Движение билетов'),
+            model_name="movingtickets",
+            name="moving_tickets",
+            field=models.IntegerField(
+                default=1, verbose_name="Движение билетов"
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='tickets',
-            name='ticket_number',
-            field=models.IntegerField(default=1, verbose_name='Номер билета'),
+            model_name="tickets",
+            name="ticket_number",
+            field=models.IntegerField(default=1, verbose_name="Номер билета"),
             preserve_default=False,
         ),
     ]
